@@ -1,34 +1,32 @@
 import logging
 import os
-
+from kafka import KafkaProducer
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from minio import Minio
 from minio.error import S3Error
 from werkzeug.utils import secure_filename
+import json
+from datetime import datetime
 
 load_dotenv()
 
-# Flask app
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = int(
     os.getenv("MAX_CONTENT_LENGTH", 100 * 1024 * 1024)
 )
 
-# Set up basic logging
 logging.basicConfig(
-    level=logging.INFO,  # Logging level
+    level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 
-# Log all incoming requests using before_request hook
 @app.before_request
 def log_request_info():
     app.logger.info(f"Request {request.method} {request.path} received.")
 
 
-# Log all responses using after_request hook (optional, logs after request is processed)
 @app.after_request
 def log_response_info(response):
     app.logger.info(f"Response status code: {response.status_code}")
@@ -46,6 +44,14 @@ bucket = os.getenv("MINIO_BUCKET")
 if not client.bucket_exists(bucket):
     client.make_bucket(bucket)
     app.logger.info(f"Bucket {bucket} created.")
+
+
+upload_topic = os.getenv("KAFKA_UPLOAD_TOPIC")
+producer = KafkaProducer(
+    bootstrap_servers=[os.getenv("KAFKA_SERVER")],
+    key_serializer=str.encode,
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+)
 
 
 @app.route("/")
@@ -78,22 +84,34 @@ def upload_file():
 
         client.put_object(
             bucket_name=bucket,
-            object_name=secure_filename(file.filename),
+            object_name=file.filename,
             data=file.stream,
             length=file_length,
             content_type=file.content_type,
         )
 
-        return (
-            jsonify({"message": f"File '{file.filename}' uploaded successfully"}),
-            200,
-        )
-
-        # publish event to kafka
-
     except S3Error as e:
         app.logger.error(e)
         return jsonify({"error": f"Error uploading file: {str(e)}"}), 500
+
+    message = {
+        "bucket": bucket,
+        "file_name": file.filename,
+        "uploaded_at": datetime.now().isoformat(),
+    }
+
+    # publish event to kafka
+    producer.send(
+        topic=upload_topic,
+        key=file.filename,
+        value=message,
+    )
+
+    producer.flush()
+
+    app.logger.info(f"Message {file.filename} sent to kafka topic {upload_topic}")
+
+    return (jsonify({"message": f"File '{file.filename}' uploaded successfully"}), 200)
 
 
 if __name__ == "__main__":

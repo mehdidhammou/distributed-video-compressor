@@ -1,4 +1,4 @@
 flask
 minio
 python-dotenv
-kafka-python
+kafka-python-ng
