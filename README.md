@@ -13,7 +13,7 @@
 ### setup env variables
 
 ```bash
-cp .env.example .env
+cp ./backend/.env.example ./backend/.env
 ```
 
 ### run the containers
