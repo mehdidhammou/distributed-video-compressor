@@ -8,6 +8,24 @@
 4. ffmpeg
 5. minio
 
+## Usage
+
+### setup env variables
+
+```bash
+cp .env.example .env
+```
+
+### run the containers
+
+```
+docker compose up -d # or make u
+```
+
+### Upload videos
+
+A react app is running in http://localhost:5173
+
 ## Licence
 
 Apache

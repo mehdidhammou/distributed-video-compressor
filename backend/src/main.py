@@ -36,13 +36,13 @@ def log_response_info(response):
 
 
 client = Minio(
-    endpoint=os.getenv("ENDPOINT_URL"),
-    access_key=os.getenv("ACCESS_KEY"),
-    secret_key=os.getenv("SECRET_KEY"),
+    endpoint=os.getenv("MINIO_ENDPOINT_URL"),
+    access_key=os.getenv("MINIO_ACCESS_KEY"),
+    secret_key=os.getenv("MINIO_SECRET_KEY"),
     secure=False,
 )
 
-bucket = os.getenv("BUCKET")
+bucket = os.getenv("MINIO_BUCKET")
 if not client.bucket_exists(bucket):
     client.make_bucket(bucket)
     app.logger.info(f"Bucket {bucket} created.")
