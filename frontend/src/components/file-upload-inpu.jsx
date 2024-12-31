@@ -1,9 +1,50 @@
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { useVideo } from "../hooks/use-video";
+
 export default function FIleUploadInput() {
+  const [isUploading, setIsUploading] = useState(false);
+  const [file, setFile] = useState(null);
+
+  const { setVideo } = useVideo();
+
+  const handleFileChange = async (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleFileUpload = async () => {
+    if (!file) {
+      toast.error("Please select a file first.");
+      return;
+    }
+
+    setVideo(URL.createObjectURL(file));
+
+    const formData = new FormData();
+    formData.append("video", file);
+    try {
+      setIsUploading(true);
+
+      const res = await fetch("http://localhost:5000/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const message = (await res.json()).message;
+      toast.success(message);
+    } catch (e) {
+      console.log(e);
+      toast.error(`Failed to upload the file. Please try again. ${e}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center w-full">
+    <div className="flex flex-col items-center justify-center w-full gap-2 md:max-w-fit md:gap-6">
       <label
         htmlFor="dropzone-file"
-        className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+        className="flex flex-col items-center justify-center w-full h-64 p-8 border border-gray-900 cursor-pointer rounded-xl hover:bg-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-600"
       >
         <div className="flex flex-col items-center justify-center pt-5 pb-6">
           <svg
@@ -34,8 +75,20 @@ export default function FIleUploadInput() {
           type="file"
           accept="video/*"
           className="hidden"
+          onChange={handleFileChange}
         />
       </label>
+      {file && (
+        <p className="text-sm text-gray-500">Selected file: {file.name}</p>
+      )}
+      <button
+        type="button"
+        disabled={isUploading}
+        onClick={handleFileUpload}
+        className="text-white w-full bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      >
+        Upload
+      </button>
     </div>
   );
 }

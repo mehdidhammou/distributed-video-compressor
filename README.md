@@ -16,9 +16,13 @@
 cp ./backend/.env.example ./backend/.env
 ```
 
+```bash
+cp ./video-compressor/.env.example ./video-compressor/.env
+```
+
 ### run the containers
 
-```
+```bash
 docker compose up -d # or make u
 ```
 

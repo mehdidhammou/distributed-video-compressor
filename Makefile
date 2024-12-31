@@ -3,3 +3,6 @@ u:
 
 d:
 	docker compose down
+
+ps:
+	docker compose ps
