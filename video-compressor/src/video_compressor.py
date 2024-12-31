@@ -42,15 +42,15 @@ class VideoCompressor:
             raise
 
     @staticmethod
-    def _get_new_file_name(file: str, target_res: int) -> str:
+    def _get_new_file_name(file_name: str, target_res: int) -> str:
         # Create new filename based on target resolution
         res = f"{target_res}p"
-        file_name, ext = os.path.splitext(os.path.basename(file))
+        file_name, ext = os.path.splitext(os.path.basename(file_name))
         return f"{file_name}-{res}{ext}"
 
     @staticmethod
-    def get_compression_resolutions(file: str) -> list[int]:
-        width, height = VideoCompressor._get_original_resolution(file)
+    def get_compression_resolutions(file_name: str) -> list[int]:
+        width, height = VideoCompressor._get_original_resolution(file_name)
         max_res = min(width, height)
 
         all_resolutions = [144, 240, 360, 480, 720, 1080, 2160]
@@ -64,14 +64,17 @@ class VideoCompressor:
         width: int, height: int, target_res: int
     ) -> tuple[int, int]:
         # Calculate target resolution while maintaining aspect ratio
-        if width > height:  # Landscape video
-            aspect_ratio = height / width
-            width = target_res
-            height = int(width * aspect_ratio)
-        else:
-            aspect_ratio = width / height
+        aspect_ratio = width / height
+        if aspect_ratio > 1:  # Landscape video
+            width = int(target_res * aspect_ratio)
             height = target_res
-            width = int(height * aspect_ratio)
+        else:  # Portrait or square video
+            width = target_res
+            height = int(target_res * aspect_ratio)
+
+        # ffmpeg doesn't accept odd dimensions
+        width += width % 2
+        height += height % 2
 
         return width, height
 
