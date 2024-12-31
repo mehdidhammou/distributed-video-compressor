@@ -1,0 +1,4 @@
+python-dotenv
+kafka-python-ng
+ffmpeg-python
+minio

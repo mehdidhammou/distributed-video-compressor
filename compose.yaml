@@ -7,11 +7,12 @@ services:
       - 5000:5000
     depends_on:
       - minio
-  
+      - kafka
+
   minio:
     image: quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z
     ports:
-      - 9000
+      - 9000:9000
       - 9090:9090 # The storage endpoint
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -21,7 +22,7 @@ services:
   kafka:
     image: apache/kafka-native:3.9.0
     ports:
-      - 9092
+      - 9092:9092
     environment:
       # Configure listeners for both docker and host communication
       KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
@@ -46,7 +47,24 @@ services:
       - 8080:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
-      KAFKA_CLUSTERS_0_NAME: video-uploads
+      KAFKA_CLUSTERS_0_NAME: video.upload
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
     depends_on:
       - kafka
+
+  video-compressor:
+    build: ./video-compressor
+    env_file:
+      - ./video-compressor/.env
+    depends_on:
+      - kafka
+      - minio
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+
+
+# TODO:
+# unbind minio's 9000
+# unbind kafka's 9092
