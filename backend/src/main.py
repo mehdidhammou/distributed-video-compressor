@@ -1,13 +1,15 @@
+import json
 import logging
 import os
-from kafka import KafkaProducer
+from datetime import datetime
+
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
+from flask_cors import CORS
+from kafka import KafkaProducer
 from minio import Minio
 from minio.error import S3Error
 from werkzeug.utils import secure_filename
-import json
-from datetime import datetime
 
 load_dotenv()
 
@@ -15,6 +17,7 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = int(
     os.getenv("MAX_CONTENT_LENGTH", 100 * 1024 * 1024)
 )
+CORS(app)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -61,10 +64,10 @@ def home():
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
-    if "file" not in request.files:
+    if "video" not in request.files:
         return jsonify({"error": "No file part in the request"}), 400
 
-    file = request.files["file"]
+    file = request.files["video"]
 
     # Check if a file was selected
     if file.filename == "":

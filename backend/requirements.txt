@@ -2,3 +2,4 @@ flask
 minio
 python-dotenv
 kafka-python-ng
+flask-cors
