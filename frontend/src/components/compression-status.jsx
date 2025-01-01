@@ -31,7 +31,7 @@ export const CompressionStatus = () => {
 
   return (
     <div className="flex flex-col w-full gap-4 p-4 border rounded-xl">
-      <h2>Compression Status for File: {video.name}</h2>
+      <h2>Compression Status</h2>
       {messages.length > 0 ? (
         messages.map((m, index) => (
           <div key={index} className="flex items-center space-x-2">
