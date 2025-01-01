@@ -10,7 +10,7 @@ export const CompressionStatus = () => {
     const videoId = video.name;
 
     const eventSource = new EventSource(
-      `http://localhost:5000/compression-status/${videoId}`
+      `${import.meta.env.VITE_API_URL}/compression-status/${videoId}`
     );
 
     eventSource.onmessage = (event) => {
