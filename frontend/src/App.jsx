@@ -1,4 +1,5 @@
-import FIleUploadInput from "./components/file-upload-inpu";
+import { CompressionStatus } from "./components/compression-status";
+import FileUploadInput from "./components/file-upload-input";
 import { useVideo } from "./hooks/use-video";
 function App() {
   const { video } = useVideo();
@@ -20,11 +21,14 @@ function App() {
         </span>
       </div>
       <div className="flex flex-col items-start justify-center w-full h-full gap-8 md:flex-row md:gap-12">
-        <FIleUploadInput />
-        <div className="w-full h-full overflow-hidden border border-gray-900 rounded-xl md:col-span-2">
+        <div className="flex flex-col items-center justify-center w-full gap-2 md:max-w-fit md:gap-6">
+          <FileUploadInput />
+          {video && <CompressionStatus />}
+        </div>
+        <div className="w-full h-full overflow-hidden border border-gray-900 aspect-auto rounded-xl md:col-span-2">
           {video && (
-            <video className="w-full h-full" controls>
-              <source src={video} type="video/mp4" />
+            <video className="w-full h-full aspect-video" controls>
+              <source src={URL.createObjectURL(video)} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           )}

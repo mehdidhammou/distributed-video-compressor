@@ -18,8 +18,6 @@ export default function FIleUploadInput() {
       return;
     }
 
-    setVideo(URL.createObjectURL(file));
-
     const formData = new FormData();
     formData.append("video", file);
     try {
@@ -30,8 +28,15 @@ export default function FIleUploadInput() {
         body: formData,
       });
 
-      const message = (await res.json()).message;
-      toast.success(message);
+      const data = await res.json();
+      toast.success(data.message);
+
+      const updatedFile = new File([file], data.video, {
+        type: file.type,
+        lastModified: file.lastModified,
+      });
+
+      setVideo(updatedFile);
     } catch (e) {
       console.log(e);
       toast.error(`Failed to upload the file. Please try again. ${e}`);
@@ -41,7 +46,7 @@ export default function FIleUploadInput() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full gap-2 md:max-w-fit md:gap-6">
+    <>
       <label
         htmlFor="dropzone-file"
         className="flex flex-col items-center justify-center w-full h-64 p-8 border border-gray-900 cursor-pointer rounded-xl hover:bg-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-600"
@@ -78,9 +83,7 @@ export default function FIleUploadInput() {
           onChange={handleFileChange}
         />
       </label>
-      {file && (
-        <p className="text-sm text-gray-500">Selected file: {file.name}</p>
-      )}
+      {file && <p className="text-sm text-gray-500">{file.name}</p>}
       <button
         type="button"
         disabled={isUploading}
@@ -89,6 +92,6 @@ export default function FIleUploadInput() {
       >
         Upload
       </button>
-    </div>
+    </>
   );
 }
