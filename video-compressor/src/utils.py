@@ -72,7 +72,7 @@ def pipeline(
         # Publish the message to Kafka
         producer.send(
             topic=topic,
-            key=output_file,  # Ensure key is bytes
+            key=file_name,
             value=message,
         )
         producer.flush()

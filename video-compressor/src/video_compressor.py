@@ -1,6 +1,5 @@
 import ffmpeg
 import os
-from minio.datatypes import Object
 import logging
 
 
